@@ -33,7 +33,7 @@ def load_data(dataset, country_list):
     return world_bank_df, temp_df.T
 
 
-def generate_bar_plot(data, year):
+def generate_bar_plot(data, year, image_name, title):
     """
     This function generates a bar plot of the Population growth (annual %)
     for the countries specified in the country_list variable. For a given year
@@ -48,6 +48,16 @@ def generate_bar_plot(data, year):
 
     plt.bar(pop_growth_annual['Country Name'],
             pop_growth_annual.loc[:, str(year)])
+    plt.xlabel("Country")
+    plt.ylabel("%")
+    plt.xticks(rotation=20)
+    plt.title(title)
+
+    plt.savefig('figures/barplot'+image_name+'.png',
+                bbox_inches='tight',
+                dpi=200)
+
+    plt.show()
 
     return
 
@@ -80,10 +90,10 @@ def generate_line_plot(data, countries, indicator, xlabel, ylabel, title):
         plt.ylabel(ylabel)
         plt.title(title)
         plt.legend()
-        
+
     plt.savefig('figures/line_graph_'+indicator+'.png',
-                 bbox_inches='tight',
-                 dpi=200)
+                bbox_inches='tight',
+                dpi=200)
     plt.show()
 
     return
@@ -182,7 +192,7 @@ def generate_pie_chart(data, year, countries, indicator, title):
     result = result.drop(['Indicator Name'], axis=0)
     result = result.loc[str(year)]
     plt.figure()
-    result.plot(kind='pie', subplots=True, autopct="%1.f%%")
+    result.plot(kind='pie', subplots=True, autopct="%1.f%%", ylabel="")
     plt.title(title)
     plt.savefig("figures/pie_chart_"+title+".png",
                 bbox_inches='tight',
@@ -192,7 +202,7 @@ def generate_pie_chart(data, year, countries, indicator, title):
     return
 
 
-def create_heatmap(cm_df,image_name, labels=False):
+def create_heatmap(cm_df, image_name, labels=False):
     """
     Creates a heatmape using the seasborn library.
 
@@ -206,10 +216,12 @@ def create_heatmap(cm_df,image_name, labels=False):
     plt.figure()
     if labels:
         sns.heatmap(cm_df, annot=True, center=True,
-                xticklabels=labels,yticklabels=labels)
+                    xticklabels=labels, yticklabels=labels)
     else:
         sns.heatmap(cm_df, annot=True, center=True)
-        
+
+    plt.title("Correlation Heatmap")
+
     plt.savefig('figures/heatmap'+image_name+'.png',
                 bbox_inches='tight',
                 dpi=200)
@@ -254,11 +266,11 @@ def main():
                        "% of land",
                        "Electricity production from oil sources (% of total)")
 
-    #generate_line_plot(wb_data_country, countries,
-    #            'Renewable electricity output (% of total electricity output)',
-    #            "Years",
-    #            "% of total",
-    #            "Renewable electricity output(% of total)")
+    generate_line_plot(wb_data_country, countries,
+                'Renewable electricity output (% of total electricity output)',
+                "Years",
+                "% of total",
+                "Renewable electricity output(% of total)")
 
     corr = generate_corr_between(wb_data_years,
         'CO2 emissions (kt)',
@@ -267,9 +279,9 @@ def main():
         'Renewable energy consumption (% of total final energy consumption)',
         'India')
 
-    create_heatmap(corr,'1', labels=['CO2','Renewable energy consumption',
-                                     'Renewable energy output',
-                                     'electricity from oil'])
+    create_heatmap(corr, '1', labels=['CO2', 'Renewable energy consumption',
+                                      'Renewable energy output',
+                                      'electricity from oil'])
 
     generate_pie_chart(wb_data_country,
                        2020,
@@ -277,45 +289,38 @@ def main():
                        'CO2 emissions (metric tons per capita)',
                        'CO2 emissions per capita')
 
-    #generate_line_plot(wb_data_country, countries,
-    #                   'Total greenhouse gas emissions (kt of CO2 equivalent)',
-    #                   "Years",
-    #                   "kt of CO2",
-    #                   "Greenhouse gas emissions")
+    generate_line_plot(wb_data_country, countries,
+                       'Total greenhouse gas emissions (kt of CO2 equivalent)',
+                       "Years",
+                       "kt of CO2",
+                       "Greenhouse gas emissions")
 
-    #generate_line_plot(wb_data_country, countries,
-    #                   'Arable land (% of land area)',
-    #                   "Years",
-    #                   "% of land",
-    #                   "Arable land %")
+    generate_bar_plot(wb_data_years, 2020,
+                      image_name='population_growth_2020',
+                      title="Population growth (%) in 2020")
 
-    #generate_bar_plot(wb_data_years, 2020)
-    #generate_bar_plot(wb_data_years, 2019)
+    generate_bar_plot(wb_data_years, 1990,
+                      image_name='population_growth_1996',
+                      title="Population growth (%) in 1996")
 
-    #generate_line_plot(wb_data_country,
-    #                   countries,
-    #                   'Population, total',
-    #                   "Years",
-    #                   "Billions",
-    #                   'Population over the years in billions')
-
-    #generate_line_plot(wb_data_country, countries,
-    #                   'Electric power consumption (kWh per capita)',
-    #                   "Years",
-    #                   "kWh per capita",
-    #                   "Electric power consumption in kWh per capita")
+    generate_line_plot(wb_data_country,
+                       countries,
+                       'Population, total',
+                       "Years",
+                       "Billions",
+                       'Population over the years in billions')
 
     corr2 = generate_corr_between(wb_data_years,
                     'Total greenhouse gas emissions (kt of CO2 equivalent)',
-                    'Electric power consumption (kWh per capita)',
+                    'Urban population (% of total population)',
                     'Population, total',
                     'Cereal yield (kg per hectare)',
-                    'India') 
-    # Electric power consumption (kWh per capita)
-    
-    create_heatmap(corr2,'2', labels=['population','greenhouse gas',
-                                      'electric consumption', 'cereal yield'])
+                    'India')
 
+    create_heatmap(corr2, '2', labels=['Urban Population %',
+                                       'Total popultation',
+                                       'Greenhouse Gas',
+                                       'Cereal Yield'])
     return
 
 
