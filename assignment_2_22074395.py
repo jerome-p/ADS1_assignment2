@@ -133,21 +133,21 @@ def generate_statistics(data, countries, indicator):
     """
 
     for country in countries:
-        
-        #Transposing DF after subsetting based on Country name is columns.
+
+        # Transposing DF after subsetting based on Country name is columns.
         temp_df = data[country].T
-        
-        # Subsetting the DF based on Indicator name now. 
+
+        # Subsetting the DF based on Indicator name now.
         # Currently years are columns. Meaning we have onlt one row of data.
         subset_df = temp_df[temp_df['Indicator Name'] == indicator]
-        
-        #transposing the DF to make country name column and years rows.
+
+        # transposing the DF to make country name column and years rows.
         subset_df = subset_df.T
-        
+
         print("\nStatistics for: " + str(country) + ": \n")
-        
+
         # Generating all basics statistics of the given data using
-        # df.describe() and median() methods. 
+        # df.describe() and median() methods.
         print(subset_df[1:].astype(float).describe())
         print("Median: " + str(subset_df[1:].astype(float).median()[country]))
 
@@ -156,7 +156,7 @@ def generate_statistics(data, countries, indicator):
         # Skew and kurtosis methods to work
         skewness = st.skew(subset_df[1:].astype(float))
         kurtosis = st.kurtosis(subset_df[1:].astype(float))
-        
+
         # Specifying the country name in the skewness DF
         # to get only value from the DF
         print("Skewness: "+str(skewness[country]))
@@ -227,36 +227,36 @@ def generate_pie_chart(data, year, countries, indicator, title):
 
     """
     # Creating an  empty Dataframe to store the specified indicator values for
-    # each country. 
+    # each country.
     result = pd.DataFrame()
-    
+
     # Iterating through the list of countries
     for country in countries:
         # Transposing the dataframe to be able to extract indicator values
         temp_df = data[country].T
         subset_df = temp_df[temp_df['Indicator Name'] == indicator]
-        
+
         # Transposing the subset to make the years rows from columns.
         subset_df = subset_df.T
-        
-        # Creating a new column in the result df and add the current country's 
-        # indicator value, i.e the subset_df        
+
+        # Creating a new column in the result df and add the current country's
+        # indicator value, i.e the subset_df
         result[country] = subset_df
-        
-    # Since the dataframe contains values of only one indicator value and 
+
+    # Since the dataframe contains values of only one indicator value and
     # only country name is needed, dropping the first row with indicator name.
     result = result.drop(['Indicator Name'], axis=0)
-    
-    #Selecting a particular year for the pie chart.
+
+    # Selecting a particular year for the pie chart.
     result = result.loc[str(year)]
     plt.figure()
-    
+
     # Plotting pie chart using the df.plot method
     result.plot(kind='pie', subplots=True, autopct="%1.f%%", ylabel="")
-    
+
     # using arguments passed while calling funtion to create title.
     plt.title(title+" in "+str(year))
-    
+
     # Saving the pie chart.
     plt.savefig("figures/pie_chart_"+title+".png",
                 bbox_inches='tight',
@@ -282,8 +282,8 @@ def create_heatmap(cm_df, image_name, country, labels=False):
     """
 
     plt.figure()
-    
-    #If no labels are given, generates heatmap with default label setting.
+
+    # If no labels are given, generates heatmap with default label setting.
     if labels:
         sns.heatmap(cm_df, annot=True, center=True,
                     xticklabels=labels, yticklabels=labels)
@@ -307,7 +307,7 @@ def main():
     Main function, it is used to run all the other funcions defined.
     returns None
     """
-    
+
     # Create a list of Countries interested in evaluating.
     countries = ['China', 'India', 'Japan',
                  'United Kingdom', 'United States', 'Germany']
@@ -341,7 +341,7 @@ def main():
                        "metric tons",
                        "CO2 emissions-Kilotons")
 
-    # Generating a line plot of % of electricity produced from oil 
+    # Generating a line plot of % of electricity produced from oil
     # for the selected countries
     generate_line_plot(wb_data_country, countries,
                        'Electricity production from oil sources (% of total)',
@@ -358,7 +358,7 @@ def main():
         "Renewable electricity output(% of total)"
     )
 
-    # Generating correlation between the selected indicators for a particular 
+    # Generating correlation between the selected indicators for a particular
     # country, in this case India.
     corr = generate_corr_between(
         wb_data_years,
@@ -386,7 +386,7 @@ def main():
         'CO2 emissions (metric tons per capita)',
         'CO2 emissions per capita'
     )
-    
+
     # Generating line plot of greenhouse gas emissions
     generate_line_plot(wb_data_country, countries,
                        'Total greenhouse gas emissions (kt of CO2 equivalent)',
@@ -410,6 +410,7 @@ def main():
         image_name='population_growth_1996',
         title="Population growth (%) in 1996")
 
+    # Generating line plot of total population of each country.
     generate_line_plot(wb_data_country,
                        countries,
                        'Population, total',
@@ -417,6 +418,7 @@ def main():
                        "Billions",
                        'Population over the years in billions')
 
+    # Calculating correlation between indicators for India.
     corr2 = generate_corr_between(
         wb_data_years,
         'Total greenhouse gas emissions (kt of CO2 equivalent)',
@@ -426,6 +428,7 @@ def main():
         'India'
     )
 
+    # Creating heatmap using the heatmap genarated from above.
     create_heatmap(corr2, '2', country='India',
                    labels=['Urban Population %',
                            'Total popultation',
@@ -437,4 +440,5 @@ def main():
 
 
 if __name__ == '__main__':
+    # Calling the main function.
     main()
